@@ -1,0 +1,19 @@
+[project]
+name = "nerfstudio-pytensorf"
+description = "Template repository for creating and registering new methods in nerfstudio."
+version = "0.1.0"
+
+dependencies = ["nerfstudio >= 0.3.0"] 
+
+[tool.setuptools.packages.find]
+include = ["pytensorf*","dataparsers*"]
+
+# register the entry point of your new method here:
+[project.entry-points.'nerfstudio.method_configs']
+#tensorf-few-shot = 'tensorf_few_shot.template_config:tensorf_few_shot'
+pytensorf = 'pytensorf.pytensorf_config:pytensorf'
+
+# register the entry point of your dataparser here:
+[project.entry-points.'nerfstudio.dataparser_configs']
+blender-free-nerf = 'dataparsers.dataparser_configs:blender_free_nerf'
+
