@@ -1,10 +1,16 @@
+# Data and large files
 outputs/
 data/
+
+# Useless log files
+*.out
+*.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.json
+
 # C extensions
 *.so
 

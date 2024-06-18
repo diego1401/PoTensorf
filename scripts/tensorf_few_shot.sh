@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define an array with the iter values
-scene_names=('hotdog' 'chair' 'ficus' 'drums' 'materials' 'mic' 'ship' 'lego')
-
+# scene_names=('hotdog' 'chair' 'ficus' 'drums' 'materials' 'mic' 'ship' 'lego')
+scene_names=('materials' 'mic' 'ship' 'lego')
 # Loop through the iter values and run train.py with each
 project_name=tensorf-few-shot
 for scene_name in "${scene_names[@]}"; do

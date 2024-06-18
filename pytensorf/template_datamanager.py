@@ -62,9 +62,22 @@ class TemplateDataManager(VanillaDataManager[PoLDataset]):
         ray_bundle = self.train_ray_generator(ray_indices)
         return ray_bundle, batch
     
+    def next_eval(self, step: int) -> Tuple[RayBundle, Dict]:
+        """Returns the next batch of data from the eval dataloader."""
+        self.eval_count += 1
+        image_batch_tmp = next(self.iter_eval_image_dataloader)
+        image_batch = {'image_idx':image_batch_tmp['image_idx'],\
+                        'image':image_batch_tmp['image']}
+        assert self.eval_pixel_sampler is not None
+        assert isinstance(image_batch, dict)
+        batch = self.eval_pixel_sampler.sample(image_batch)
+        ray_indices = batch["indices"]
+        ray_bundle = self.eval_ray_generator(ray_indices)
+        return ray_bundle, batch
+    
     def next_train_pol_supervision(self, level: int) -> Tuple[RayBundle, Dict]:
         """Returns the next batch of data from the train dataloader."""
-        self.train_count += 1
+        # self.train_count += 1
         image_batch = next(self.iter_train_image_dataloader)
         image_batch = {'image_idx':image_batch['image_idx'],\
                        'image':image_batch['pyramid_of_laplacians'][level]}
