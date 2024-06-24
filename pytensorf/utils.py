@@ -9,6 +9,17 @@ from nerfstudio.engine.schedulers import (
     ExponentialDecaySchedulerConfig,
 )
 
+class ZeroLinear(torch.nn.Linear):
+    def __init__(self, in_features: int, out_features: int, bias: bool = True,
+                 device=None, dtype=None) -> None:
+        super().__init__(in_features,out_features,bias,device,dtype)
+
+    def reset_parameters(self) -> None:
+        self.weight.data.fill_(0)
+        if self.bias is not None:
+            self.bias.data.fill_(0)
+
+
 @dataclass
 class AdamWOptimizerConfig(OptimizerConfig):
     """Basic optimizer config with Adam"""
@@ -29,22 +40,23 @@ def create_all_possible_optimizers():
         },
     }
     possible_number_of_levels = [1,2,3,4,5,6,7,8]
-    scale = 0.0 #TODO:could be tested, probably the most effect on a pyramid with 6 levels
+    scale = 0.5 #TODO:could be tested, probably the most effect on a pyramid with 6 levels
     wd_for_bottom_levels = 0.05/100
     init_lr = 0.02 # tensorf = 0.02
     
     for n_levels in possible_number_of_levels:
         for lvl in range(n_levels):
             reversed_levels_index = n_levels - 1 - lvl
-            learning_rate = init_lr/pow(2,scale*reversed_levels_index) * n_levels
-            wd = wd_for_bottom_levels if lvl < (n_levels-1) else 0
+            learning_rate = init_lr#/pow(2,scale*reversed_levels_index) 
+            # wd = wd_for_bottom_levels if lvl < (n_levels-1) else 0
+            wd = 0
             # print("learning rate",learning_rate,"weight",wd)
             optimizers[f"color_encodings_{lvl}_pysize_{n_levels}"] = {
                 "optimizer": AdamWOptimizerConfig(lr=learning_rate,weight_decay=wd),
                 "scheduler": ExponentialDecaySchedulerConfig(lr_final=learning_rate/10, max_steps=30000),
             }
             optimizers[f"density_encodings_{lvl}_pysize_{n_levels}"] = {
-                "optimizer": AdamWOptimizerConfig(lr=learning_rate,weight_decay=0), #density is not sparse in any of the levels
+                "optimizer": AdamWOptimizerConfig(lr=learning_rate,weight_decay=wd), #density is not sparse in any of the levels
                 "scheduler": ExponentialDecaySchedulerConfig(lr_final=learning_rate/10, max_steps=30000),
             }
     return optimizers

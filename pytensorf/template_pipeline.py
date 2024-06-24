@@ -34,9 +34,9 @@ class TemplatePipelineConfig(VanillaPipelineConfig):
     """specifies the datamanager config"""
     model: ModelConfig = PyTensoRFModelConfig()
     """specifies the model config"""
-    pol_supervision: bool = False
-    """Apply supervision on the different levels of the Laplacian Pyramid"""
-    pol_supervision_weight: float = 0.01
+    # pol_supervision: bool = False
+    # """Apply supervision on the different levels of the Laplacian Pyramid"""
+    # pol_supervision_weight: float = 0.01
 
 
 class TemplatePipeline(VanillaPipeline):
@@ -80,26 +80,18 @@ class TemplatePipeline(VanillaPipeline):
             )
             dist.barrier(device_ids=[local_rank])
 
-    @profiler.time_function
-    def get_train_loss_dict(self, step: int):
-        """This function gets your training loss dict. This will be responsible for
-        getting the next batch of data from the DataManager and interfacing with the
-        Model class, feeding the data to the model's forward function.
+    # @profiler.time_function
+    # def get_train_loss_dict(self, step: int):
+    #     """This function gets your training loss dict. This will be responsible for
+    #     getting the next batch of data from the DataManager and interfacing with the
+    #     Model class, feeding the data to the model's forward function.
 
-        Args:
-            step: current iteration step to update sampler if using DDP (distributed)
-        """
-        #TODO: adapt to take level values on the go
-        ray_bundle, batch = self.datamanager.next_train(step)
-        model_outputs = self._model(ray_bundle)  # train distributed data parallel model if world_size > 1
-        metrics_dict = self.model.get_metrics_dict(model_outputs, batch)
-        loss_dict = self.model.get_loss_dict(model_outputs, batch, metrics_dict)
-        if self.config.pol_supervision:
-            for level in range(self._model.number_of_levels):
-                ray_bundle, batch = self.datamanager.next_train_pol_supervision(level)
-                model_outputs_level = self._model.forward_at_level(ray_bundle,self._model.number_of_levels-1-level)  # train distributed data parallel model if world_size > 1
-                loss_dict_at_level = self.model.get_loss_dict(model_outputs_level, batch, None)
-                for loss_names in loss_dict.keys():
-                    loss_dict[loss_names] += self.config.pol_supervision_weight * loss_dict_at_level[loss_names]/self._model.number_of_levels
-
-        return model_outputs, loss_dict, metrics_dict
+    #     Args:
+    #         step: current iteration step to update sampler if using DDP (distributed)
+    #     """
+    #     ray_bundle, batch = self.datamanager.next_train(step)
+    #     model_outputs = self._model(ray_bundle)  # train distributed data parallel model if world_size > 1
+    #     metrics_dict = self.model.get_metrics_dict(model_outputs, batch)
+    #     loss_dict = self.model.get_loss_dict(model_outputs, batch, metrics_dict)
+        
+    #     return model_outputs, loss_dict, metrics_dict
